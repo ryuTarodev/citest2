@@ -13,18 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     step:
-      -name: Checkout code
-       uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      -name: Set up Docker Compose
-       run: |
+      - name: Set up Docker Compose
+        run: |
           docker compose up -d
           echo "waiting.. container"
           sleep 20
       
-      -name: run test inside web container
-       run: docker compose exec -it web curl http://localhost:5000/api/users
+      - name: run test inside web container
+        run: docker compose exec -it web curl http://localhost:5000/api/users
 
-      -name: shutdown docker compose
-      if: always()
-      run: docker compose down
+      - name: shutdown docker compose
+        if: always()
+        run: docker compose down
