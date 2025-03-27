@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI for Flask and MySQL
 
 on:
   push:
@@ -9,45 +9,22 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: unidb
-        ports:
-          - 3307:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -p 3307 -u root -p rootpassword"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+    step:
+      -name: Checkout code
+       uses: actions/checkout@v3
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      -name: Set up Docker Compose
+       run: |
+          docker compose up -d
+          echo "waiting.. container"
+          sleep 20
+      
+      -name: run test inside web container
+       run: docker compose exec -it web curl http://localhost:5000/api/users
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install Dependencies
-        run: |
-          pip install -r app/requirements.txt
-
-      - name: Run Linter
-        run: |
-          pip install flake8
-          flake8 app/
-
-      - name: Start Flask App
-        run: |
-          python app/app.py &
-          sleep 5
-
-      - name: Test API Endpoint
-        run: curl --fail http://localhost:5000/
+      -name: shutdown docker compose
+      if: always()
+      run: docker compose down
