@@ -12,7 +12,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    step:
+    steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
